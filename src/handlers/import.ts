@@ -17,6 +17,11 @@ interface CiphersImportRequest {
       username?: string | null;
       password?: string | null;
       totp?: string | null;
+      autofillOnPageLoad?: boolean | null;
+      fido2Credentials?: any[] | null;
+      uri?: string | null;
+      passwordRevisionDate?: string | null;
+      [key: string]: any;
     } | null;
     card?: {
       cardholderName?: string | null;
@@ -143,6 +148,7 @@ export async function handleCiphersImport(request: Request, env: Env, userId: st
     const folderId = cipherFolderMap.get(i) || null;
 
     const cipher: Cipher = {
+      ...c,
       id: generateUUID(),
       userId: userId,
       type: c.type as CipherType,
@@ -151,6 +157,7 @@ export async function handleCiphersImport(request: Request, env: Env, userId: st
       notes: c.notes || null,
       favorite: c.favorite || false,
       login: c.login ? {
+        ...c.login,
         username: c.login.username || null,
         password: c.login.password || null,
         uris: c.login.uris?.map(u => ({
@@ -159,10 +166,10 @@ export async function handleCiphersImport(request: Request, env: Env, userId: st
           match: u.match ?? null,
         })) || null,
         totp: c.login.totp || null,
-        autofillOnPageLoad: null,
-        fido2Credentials: null,
-        uri: null,
-        passwordRevisionDate: null,
+        autofillOnPageLoad: c.login.autofillOnPageLoad ?? null,
+        fido2Credentials: c.login.fido2Credentials ?? null,
+        uri: c.login.uri ?? null,
+        passwordRevisionDate: c.login.passwordRevisionDate ?? null,
       } : null,
       card: c.card ? {
         cardholderName: c.card.cardholderName || null,
@@ -201,8 +208,8 @@ export async function handleCiphersImport(request: Request, env: Env, userId: st
       })) || null,
       passwordHistory: c.passwordHistory || null,
       reprompt: c.reprompt || 0,
-      sshKey: null,
-      key: null,
+      sshKey: (c as any).sshKey ?? null,
+      key: (c as any).key ?? null,
       createdAt: now,
       updatedAt: now,
       deletedAt: null,
